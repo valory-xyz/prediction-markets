@@ -22,4 +22,4 @@ Two folders will be generated, one for each agent. Among other contents, the log
   - Python `== 3.10`
   - [Pipenv](https://pipenv.pypa.io/en/latest/installation/) `>=2021.x.xx`
 
-The script automatically installs tendermint v0.34.19 if it does not exist
+The script automatically installs tendermint `v0.34.19` if it does not exist
