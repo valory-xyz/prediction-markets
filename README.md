@@ -11,7 +11,9 @@ and populate three `.env` files as follows:
 3. .demo.env: this environment file should contain the variables for the demo
 
 In order to run the demo, simply run:
+```shell
 ./demo.sh
+```
 
 Two folders will be generated, one for each agent. Among other contents, the logs are accessible within the folders.
 
