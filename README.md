@@ -39,6 +39,7 @@ Finally, the trader agent runs as part of a **trader service**, which is an [aut
 * In the field *"No. of slots to canonical agent Ids"* enter the number `1`
 * In the field *"Cost of agent instance bond (wei)"* enter the number `10000000000000000`
 * In the field *"Threshold"* enter the number `1`
+* Press the *"Submit"* button. Your wallet will ask you to approve the transaction. Once the transaction is settled, you should see a message indicating that the service NFT has been minted successfully. You should also see that the service is in _Pre-Registration_ state.
 - Next, you can navigate to https://registry.olas.network/services#my-services, select your service and go through the steps:
   1. Activate registration
   2. Register agents: here, you must use the same public key that you use in the `ALL_PARTICIPANTS` value.
