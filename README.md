@@ -28,7 +28,7 @@ Two Gnosis addresses, and corresponding secret keys, are recommended to be creat
 Other variables that need to be filled in with your own values are:
 
 * `OPENAI_API_KEY` and `ETHEREUM_LEDGER_RPC` in the file `.creator.env`
-* `OMEN_CREATORS` and `RPC_0` in the file `.demo.env`
+* `OMEN_CREATORS` and `RPC_0` in the file `.trader.env`
 
 Finally, the trader agent runs as part of a **trader service**, which is an [autonomous service](https://docs.autonolas.network/open-autonomy/get_started/what_is_an_agent_service/) that is represented on-chain in the Autonolas protocol by a Safe multisig, corresponding to the variable `SAFE_CONTRACT_ADDRESS` in the file `.trader.env`. Follow the next steps to compute the **Safe address** corresponding to your agent address:
 
