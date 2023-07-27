@@ -40,10 +40,10 @@ Finally, the trader agent runs as part of a **trader service**, which is an [aut
 * In the field *"Cost of agent instance bond (wei)"* enter the number `10000000000000000`
 * In the field *"Threshold"* enter the number `1`
 * Click on *"Submit"*.
-* After completing the minting process you will be able to retrieve the value for the variable `SAFE_CONTRACT_ADDRESS` from the field 
+* After completing the minting process you will be able to retrieve the value for the variable `SAFE_CONTRACT_ADDRESS` from the field
 *"Safe contract address"* as shown in an example below
 
-[![Safe address field](/img/safe_address_screenshot.png)]
+<img src="/img/safe_address_screenshot.png" alt="Safe address field]" width="500"/>
 
 Finally run the demo script:
 ```shell
