@@ -23,7 +23,7 @@ Two Gnosis addresses, and corresponding secret keys, are recommended to be creat
 
 * Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file .demo.env
 
-* Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file `.demo.env`
+* Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the file `.demo.env`
 
 Other variables that need to be filled in with your own values are:
 
