@@ -39,9 +39,11 @@ Finally, the trader agent runs as part of a **trader service**, which is an [aut
 * In the field *"No. of slots to canonical agent Ids"* enter the number `1`
 * In the field *"Cost of agent instance bond (wei)"* enter the number `10000000000000000`
 * In the field *"Threshold"* enter the number `1`
-* Click on *"Submit"*.
-* After completing the minting process you will be able to retrieve the value for the variable `SAFE_CONTRACT_ADDRESS` from the field 
-*"Safe contract address"* as shown in an example below
+- Next, you can navigate to https://registry.olas.network/services#my-services, select your service and go through the steps:
+  1. Activate registration
+  2. Register agents: here, you must use the same public key that you use in the `ALL_PARTICIPANTS` value.
+  3. This is the last step. A transaction for the safe's deployment is already prepared and needs to be executed.
+- After completing the process you will be able to retrieve the value for the variable `SAFE_CONTRACT_ADDRESS` from the field *"Safe contract address"* as shown in an example below
 
 <img src="/img/safe_address_screenshot.png" alt="Safe address field]" width="500"/>
 
