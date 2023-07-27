@@ -21,7 +21,7 @@ The script automatically installs Tendermint `v0.34.19` if it is not present in 
 
 Two Gnosis addresses, and corresponding secret keys, are recommended to be created for this demo:
 
-*  Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the file .demo.env
+* Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file .demo.env
 
 * Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file `.demo.env`
 
