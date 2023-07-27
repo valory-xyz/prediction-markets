@@ -54,4 +54,4 @@ Two folders will be generated, one for each agent. Among other contents, the log
 
 # Demo video
 
-A [demo video](https) is available.
+A [demo video](./img/demo_predicition_markets.mp4) is available.
