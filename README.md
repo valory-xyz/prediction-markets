@@ -21,9 +21,9 @@ The script automatically installs Tendermint `v0.34.19` if it is not present in 
 
 Two Gnosis addresses, and corresponding secret keys, are recommended to be created for this demo:
 
-* Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file .demo.env
+* Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `TRADER_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file .demo.env
 
-* Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `YOUR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the file `.demo.env`
+* Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `CREATOR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the file `.demo.env`
 
 Other variables that need to be filled in with your own values are:
 
@@ -42,7 +42,7 @@ Finally, the trader agent runs as part of a **trader service**, which is an [aut
 * Press the *"Submit"* button. Your wallet will ask you to approve the transaction. Once the transaction is settled, you should see a message indicating that the service NFT has been minted successfully. You should also see that the service is in _Pre-Registration_ state.
 - Next, you can navigate to https://registry.olas.network/services#my-services, select your service and go through the steps:
   1. Activate registration
-  2. Register agents: here, you must use the same public key that you use in the `ALL_PARTICIPANTS` value.
+  2. Register agents: here, you must use the value that you set previously for `TRADER_AGENT_ADDRESS`.
   3. This is the last step. A transaction for the safe's deployment is already prepared and needs to be executed.
 - After completing the process you will be able to retrieve the value for the variable `SAFE_CONTRACT_ADDRESS` from the field *"Safe contract address"* as shown in an example below
 
