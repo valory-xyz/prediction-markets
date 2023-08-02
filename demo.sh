@@ -39,7 +39,7 @@ then
 else
     echo "Fetching the market creator service..."
     service_version=":$CREATOR_SERVICE_VERSION:$CREATOR_SERVICE_HASH"
-    poetry run autonomy fetch --service valory/market_maker:$service_version --alias $directory
+    pipenv run autonomy fetch --service valory/market_maker:$service_version --alias $directory
 fi
 
 cd $directory
@@ -51,7 +51,7 @@ then
 else
     echo "Building the market creator service..."
     # Build the image
-    poetry run autonomy build-image
+    pipenv run autonomy build-image
     cat > keys.json << EOF
 [
   {
@@ -61,11 +61,11 @@ else
 ]
 EOF
     # Build the deployment with a single agent
-    poetry run autonomy deploy build --n 1 -ltm
+    pipenv run autonomy deploy build --n 1 -ltm
 fi
 
 # Run the deployment
-poetry run autonomy deploy run --build-dir abci_build/ &
+pipenv run autonomy deploy run --build-dir abci_build/ &
 
 cd ..
 
@@ -83,7 +83,7 @@ then
 else
     echo "Fetching the trader service..."
     service_version=":$TRADER_SERVICE_VERSION:$TRADER_SERVICE_HASH"
-    poetry run autonomy fetch --service valory/trader:$service_version --alias $directory
+    pipenv run autonomy fetch --service valory/trader:$service_version --alias $directory
 fi
 
 cd $directory
@@ -95,7 +95,7 @@ then
 else
     echo "Building the trader service..."
     # Build the image
-    poetry run autonomy build-image
+    pipenv run autonomy build-image
     cat > keys.json << EOF
 [
   {
@@ -105,8 +105,8 @@ else
 ]
 EOF
     # Build the deployment with a single agent
-    poetry run autonomy deploy build --n 1 -ltm
+    pipenv run autonomy deploy build --n 1 -ltm
 fi
 
 # Run the deployment
-poetry run autonomy deploy run --build-dir abci_build/ &
+pipenv run autonomy deploy run --build-dir abci_build/ &
