@@ -29,7 +29,7 @@ export ETHEREUM_LEDGER_RPC=$RPC
 export ETHEREUM_LEDGER_CHAIN_ID=$CHAIN_ID
 
 # Set all participants
-export ALL_PARTICIPANTS='["'$TRADER_AGENT_ADDRESS'"]'
+export ALL_PARTICIPANTS='["'$CREATOR_AGENT_ADDRESS'"]'
 
 # Run the market creator service
 directory="creator_service"
@@ -73,7 +73,7 @@ cd ..
 set -o allexport && source .trader.env && set +o allexport
 
 # Set all participants
-export ALL_PARTICIPANTS='["'$CREATOR_AGENT_ADDRESS'"]'
+export ALL_PARTICIPANTS='["'$TRADER_AGENT_ADDRESS'"]'
 
 # Run the trader service
 directory="trader_service"
