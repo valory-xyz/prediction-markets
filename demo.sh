@@ -72,6 +72,9 @@ cd ..
 # Load trader env vars
 set -o allexport && source .trader.env && set +o allexport
 
+# Re-assign confusing overrides
+export RPC_0=$RPC
+
 # Set all participants
 export ALL_PARTICIPANTS='["'$TRADER_AGENT_ADDRESS'"]'
 
