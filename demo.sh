@@ -38,6 +38,7 @@ then
     echo "Detected an existing service in $directory. Using this one..."
 else
     echo "Fetching the market creator service..."
+    service_version=":$CREATOR_SERVICE_VERSION:$CREATOR_SERVICE_HASH"
     poetry run autonomy fetch --service valory/market_maker:$service_version --alias $directory
 fi
 
@@ -81,6 +82,7 @@ then
     echo "Detected an existing service in $directory. Using this one..."
 else
     echo "Fetching the trader service..."
+    service_version=":$TRADER_SERVICE_VERSION:$TRADER_SERVICE_HASH"
     poetry run autonomy fetch --service valory/trader:$service_version --alias $directory
 fi
 
