@@ -4,10 +4,9 @@ This is a demo that allows a user to run a [market creator](https://github.com/v
 and a [trader](https://github.com/valory-xyz/trader) service via a script. 
 
 To get started, the user must [mint the services on-chain](https://docs.autonolas.network/protocol/mint_packages_nfts/#mint-a-service) 
-and populate three `.env` files as follows:
+and populate two `.env` files as follows:
 1. `.creator.env`: this environment file should contain the variables for the market creator service
 2. `.trader.env`: this environment file should contain the variables for the trader service
-3. `.demo.env`: this environment file should contain the variables for the demo
 
 # System requirements
 
@@ -21,14 +20,14 @@ The script automatically installs Tendermint `v0.34.19` if it is not present in 
 
 Two Gnosis addresses, and corresponding secret keys, are recommended to be created for this demo:
 
-* Gnosis address #1 is associated with the **trader agent** (and you need to replace the field `TRADER_AGENT_ADDRESS` in the file `.trader.env` with that address). The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the file .demo.env
+* Gnosis address #1 is associated with the **trader agent**, and you need to associate the `TRADER_AGENT_ADDRESS` env variable in the file `.trader.env` with that address. The corresponding private key needs to be set as the value of the env variable `TRADER_P_KEY` in the same file
 
-* Another Gnosis address #2 is associated with the **market creator agent** (and you need to replace the field `CREATOR_AGENT_ADDRESS` in the file `.market.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the file `.demo.env`
+* Another Gnosis address #2 is associated with the **market creator agent**, and you need to associate the `CREATOR_AGENT_ADDRESS` env variable in the file `.creator.env` with that address). The corresponding private key needs to be set as the value of the env variable `CREATOR_P_KEY` in the same file
 
 Other variables that need to be filled in with your own values are:
 
-* `OPENAI_API_KEY` and `ETHEREUM_LEDGER_RPC` in the file `.creator.env`
-* `OMEN_CREATORS` and `RPC_0` in the file `.trader.env`
+* `OPENAI_API_KEY` and `RPC` in the file `.creator.env`
+* `OMEN_CREATORS` and `RPC` in the file `.trader.env`
 
 Finally, the agents run as part of [autonomous services](https://docs.autonolas.network/open-autonomy/get_started/what_is_an_agent_service/) 
 that are represented on-chain in the Autonolas protocol by Safe multisigs, 
@@ -57,6 +56,19 @@ Finally, run the demo script:
 ```
 
 Two folders will be generated, one for each service. Among other contents, the logs are accessible within the folders.
+For example, `creator_service/abci_build/persistent_data/logs` contains the creator service's logs.
+
+Keep in ming that the script runs some docker containers in the background. 
+In order to stop all the containers, please run on a separate terminal:
+```shell
+docker rm -f -v marketmaker_abci_0 marketmaker_tm_0 trader_abci_0 trader_tm_0
+```
+
+When you run the script for a second time, it reuses the existing build, recreating the previous state. 
+In case you want to re-create your build, then before running the script execute:
+```shell
+sudo rm -rf creator_service/abci_build && sudo rm -rf trader_service/abci_build
+```
 
 # Demo video
 
