@@ -4,10 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-open-autonomy = {version = "==0.10.8", extras = ["all"]}
-open-aea-test-autonomy = "==0.10.8"
-open-aea-ledger-ethereum = "==1.36.0"
-open-aea-ledger-cosmos = "==1.36.0"
+open-autonomy = {version = "==0.10.10.post1", extras = ["all"]}
+open-aea-test-autonomy = "==0.10.10.post1"
+open-aea-ledger-ethereum = "==1.37.0"
+open-aea-ledger-cosmos = "==1.37.0"
 hypothesis = "==6.21.6"
 py-eth-sig-utils = "*"
 hexbytes = "*"
