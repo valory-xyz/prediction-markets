@@ -21,14 +21,15 @@ command -v docker-compose >/dev/null 2>&1 ||
 pipenv install
 pipenv run autonomy init --remote --ipfs --reset --author=prediction_markets_demo
 
-# Load demo env vars
-export $(grep -v '^#' .demo.env | xargs)
 # Load market creator env vars
 set -o allexport && source .creator.env && set +o allexport
 
 # Re-assign confusing overrides
-export $ETHEREUM_LEDGER_RPC=$RPC
-export $ETHEREUM_LEDGER_CHAIN_ID=$CHAIN_ID
+export ETHEREUM_LEDGER_RPC=$RPC
+export ETHEREUM_LEDGER_CHAIN_ID=$CHAIN_ID
+
+# Set all participants
+export ALL_PARTICIPANTS='["'$TRADER_AGENT_ADDRESS'"]'
 
 # Run the market creator service
 directory="creator_service"
@@ -53,8 +54,8 @@ else
     cat > keys.json << EOF
 [
   {
-    "address": "$AGENT_ADDRESS",
-    "private_key": "$private_key"
+    "address": "$TRADER_AGENT_ADDRESS",
+    "private_key": "$CREATOR_P_KEY"
   }
 ]
 EOF
@@ -69,6 +70,9 @@ cd ..
 
 # Load trader env vars
 set -o allexport && source .trader.env && set +o allexport
+
+# Set all participants
+export ALL_PARTICIPANTS='["'$CREATOR_AGENT_ADDRESS'"]'
 
 # Run the trader service
 directory="trader_service"
@@ -93,8 +97,8 @@ else
     cat > keys.json << EOF
 [
   {
-    "address": "$AGENT_ADDRESS",
-    "private_key": "$private_key"
+    "address": "$CREATOR_AGENT_ADDRESS",
+    "private_key": "$TRADER_P_KEY"
   }
 ]
 EOF
