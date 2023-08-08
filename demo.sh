@@ -1,114 +1,115 @@
 #!/bin/bash
 
+set -e
+
+command -v pipenv >/dev/null 2>&1 ||
+{ echo >&2 "Pipenv is not installed!";
+  exit 1
+}
+
+command -v docker >/dev/null 2>&1 ||
+{ echo >&2 "Docker is not installed!";
+  exit 1
+}
+
+command -v docker-compose >/dev/null 2>&1 ||
+{ echo >&2 "docker-compose is not available!";
+  exit 1
+}
+
 # setup
 pipenv install
 pipenv run autonomy init --remote --ipfs --reset --author=prediction_markets_demo
 
-if [ ! command -v tendermint &> /dev/null ]
-then
-  wget -O tendermint.tar.gz \
-          https://github.com/tendermint/tendermint/releases/download/v0.34.19/tendermint_0.34.19_linux_amd64.tar.gz
-  tar -xf tendermint.tar.gz
-  sudo mv tendermint /usr/local/bin/tendermint
-fi
-
-# Load demo env vars
-export $(grep -v '^#' .demo.env | xargs)
 # Load market creator env vars
 set -o allexport && source .creator.env && set +o allexport
 
-# Export them as agent overrides
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_SETUP_ALL_PARTICIPANTS=$ALL_PARTICIPANTS
-export CONNECTION_OPENAI_CONFIG_OPENAI_API_KEY=$OPENAI_API_KEY
-export CONNECTION_LEDGER_CONFIG_LEDGER_APIS_ETHEREUM_ADDRESS=$ETHEREUM_LEDGER_RPC
-export CONNECTION_LEDGER_CONFIG_LEDGER_APIS_ETHEREUM_CHAIN_ID=$ETHEREUM_LEDGER_CHAIN_ID
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_NUM_MARKETS=$NUM_MARKETS
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_NEWSAPI_ENDPOINT=$NEWSAPI_ENDPOINT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_MARKET_FEE=$MARKET_FEE
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_INITIAL_FUNDS=$INITIAL_FUNDS
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_MARKET_TIMEOUT=$MARKET_TIMEOUT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_REALITIO_CONTRACT=$REALITIO_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_REALITIO_ORACLE_PROXY_CONTRACT=$REALITIO_ORACLE_PROXY_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_CONDITIONAL_TOKENS_CONTRACT=$CONDITIONAL_TOKENS_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_FPMM_DETERMINISTIC_FACTORY_CONTRACT=$FPMM_DETERMINISTIC_FACTORY_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_COLLATERAL_TOKENS_CONTRACT=$COLLATERAL_TOKENS_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_ARBITRATOR_CONTRACT=$ARBITRATOR_CONTRACT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_MULTISEND_ADDRESS=$MULTISEND_ADDRESS
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_TOPICS=$TOPICS
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_MARKET_IDENTIFICATION_PROMPT=$MARKET_IDENTIFICATION_PROMPT
+# Re-assign confusing overrides
+export ETHEREUM_LEDGER_RPC=$RPC
+export ETHEREUM_LEDGER_CHAIN_ID=$CHAIN_ID
 
-# export tm overrides
-TM_PORT=26658
-TM_RPC_PORT=26657
-TM_P2P_PORT=26656
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_TENDERMINT_URL=http://localhost:$TM_RPC_PORT
-export SKILL_MARKET_MAKER_ABCI_MODELS_PARAMS_ARGS_TENDERMINT_P2P_URL=localhost:$TM_P2P_PORT
-export TM_FOLDER=tm
+# Set all participants
+export ALL_PARTICIPANTS='["'$CREATOR_AGENT_ADDRESS'"]'
 
-# Run the market creator agent
-rm -rf market_maker
-pipenv run autonomy fetch valory/market_maker:$CREATOR_AGENT_VERSION:$CREATOR_AGENT_HASH
-cd market_maker
-sed -i 's/port: ${int:26658}/port: ${int:'$TM_PORT'}/g' aea-config.yaml
-echo -n $CREATOR_P_KEY >> ethereum_private_key.txt
-pipenv run autonomy add-key ethereum
-pipenv run autonomy issue-certificates
-pipenv run autonomy run --aev &
-mkdir $TM_FOLDER
-tendermint init --home=$TM_FOLDER
-tendermint node --home=$TM_FOLDER \
-                --proxy_app=tcp://127.0.0.1:$TM_PORT \
-                --rpc.laddr=tcp://127.0.0.1:$TM_RPC_PORT \
-                --p2p.laddr=tcp://0.0.0.0:$TM_P2P_PORT \
-                --p2p.seeds= \
-                --consensus.create_empty_blocks=true &
+# Run the market creator service
+directory="creator_service"
+if [ -d $directory ]
+then
+    echo "Detected an existing service in $directory. Using this one..."
+else
+    echo "Fetching the market creator service..."
+    service_version=":$CREATOR_SERVICE_VERSION:$CREATOR_SERVICE_HASH"
+    pipenv run autonomy fetch --service valory/market_maker$service_version --alias $directory
+fi
+
+cd $directory
+
+directory="abci_build"
+if [ -d $directory ]
+then
+    echo "Detected an existing build in the current folder. Using this one..."
+else
+    echo "Building the market creator service..."
+    # Build the image
+    pipenv run autonomy build-image
+    cat > keys.json << EOF
+[
+  {
+    "address": "$TRADER_AGENT_ADDRESS",
+    "private_key": "$CREATOR_P_KEY"
+  }
+]
+EOF
+    # Build the deployment with a single agent
+    pipenv run autonomy deploy build --n 1 -ltm
+fi
+
+# Run the deployment
+pipenv run autonomy deploy run --build-dir abci_build/ &
+
 cd ..
 
 # Load trader env vars
 set -o allexport && source .trader.env && set +o allexport
 
-# Export them as agent overrides
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_SETUP_ALL_PARTICIPANTS=$ALL_PARTICIPANTS
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_SETUP_SAFE_CONTRACT_ADDRESS=$SAFE_CONTRACT_ADDRESS
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_CREATOR_PER_SUBGRAPH_OMEN_SUBGRAPH=$OMEN_CREATORS
-export CONNECTION_LEDGER_CONFIG_LEDGER_APIS_ETHEREUM_ADDRESS=$RPC_0
-export CONNECTION_LEDGER_CONFIG_LEDGER_APIS_ETHEREUM_CHAIN_ID=$CHAIN_ID
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.0=$BET_AMOUNT_PER_THRESHOLD_000
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.1=$BET_AMOUNT_PER_THRESHOLD_010
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.2=$BET_AMOUNT_PER_THRESHOLD_020
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.3=$BET_AMOUNT_PER_THRESHOLD_030
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.4=$BET_AMOUNT_PER_THRESHOLD_040
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.5=$BET_AMOUNT_PER_THRESHOLD_050
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.6=$BET_AMOUNT_PER_THRESHOLD_060
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.7=$BET_AMOUNT_PER_THRESHOLD_070
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.8=$BET_AMOUNT_PER_THRESHOLD_080
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_0.9=$BET_AMOUNT_PER_THRESHOLD_090
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_AMOUNT_PER_THRESHOLD_1.0=$BET_AMOUNT_PER_THRESHOLD_100
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_BET_THRESHOLD=$BET_THRESHOLD
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_PROMPT_TEMPLATE=$PROMPT_TEMPLATE
+# Re-assign confusing overrides
+export RPC_0=$RPC
 
-# export tm overrides
-TM_PORT=26668
-TM_RPC_PORT=26667
-TM_P2P_PORT=26666
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_TENDERMINT_URL=http://localhost:$TM_RPC_PORT
-export SKILL_TRADER_ABCI_MODELS_PARAMS_ARGS_TENDERMINT_P2P_URL=localhost:$TM_P2P_PORT
+# Set all participants
+export ALL_PARTICIPANTS='["'$TRADER_AGENT_ADDRESS'"]'
 
-# Run the trader agent
-rm -rf trader
-pipenv run autonomy fetch valory/trader:$TRADER_AGENT_VERSION:$TRADER_AGENT_HASH
-cd trader
-sed -i 's/port: ${int:26658}/port: ${int:'$TM_PORT'}/g' aea-config.yaml
-echo -n $TRADER_P_KEY >> ethereum_private_key.txt
-pipenv run autonomy add-key ethereum
-pipenv run autonomy issue-certificates
-pipenv run autonomy run --aev &
-mkdir $TM_FOLDER
-tendermint init --home=$TM_FOLDER
-tendermint node --home=$TM_FOLDER \
-                --proxy_app=tcp://127.0.0.1:$TM_PORT \
-                --rpc.laddr=tcp://127.0.0.1:$TM_RPC_PORT \
-                --p2p.laddr=tcp://0.0.0.0:$TM_P2P_PORT \
-                --p2p.seeds= \
-                --consensus.create_empty_blocks=true &
-cd ..
+# Run the trader service
+directory="trader_service"
+if [ -d $directory ]
+then
+    echo "Detected an existing service in $directory. Using this one..."
+else
+    echo "Fetching the trader service..."
+    service_version=":$TRADER_SERVICE_VERSION:$TRADER_SERVICE_HASH"
+    pipenv run autonomy fetch --service valory/trader$service_version --alias $directory
+fi
+
+cd $directory
+
+directory="abci_build"
+if [ -d $directory ]
+then
+    echo "Detected an existing build in the current folder. Using this one..."
+else
+    echo "Building the trader service..."
+    # Build the image
+    pipenv run autonomy build-image
+    cat > keys.json << EOF
+[
+  {
+    "address": "$CREATOR_AGENT_ADDRESS",
+    "private_key": "$TRADER_P_KEY"
+  }
+]
+EOF
+    # Build the deployment with a single agent
+    pipenv run autonomy deploy build --n 1 -ltm
+fi
+
+# Run the deployment
+pipenv run autonomy deploy run --build-dir abci_build/ &
